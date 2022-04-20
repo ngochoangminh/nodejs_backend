@@ -18,7 +18,7 @@ app.use('/api/customer', customerRT); // localhost:{$PORT}/api/customer/register
 
 app.get('/', (request, response) => {
     // The string we want to display on http://localhost:3000
-    console.log("this is '/' site!")
+    console.log("This is '/' site!")
     response.send('Welcome on the firt API with nodejs express and mongodb! \n Take a breath and start using it!')
   });
 

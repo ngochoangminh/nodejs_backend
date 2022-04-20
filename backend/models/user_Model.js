@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const crypto = require('crypto')
+
 const UserSchema = new mongoose.Schema ({
     name:{
         type: String,
@@ -16,6 +17,10 @@ const UserSchema = new mongoose.Schema ({
     password:{
         type:String,
         required: true,
+    },
+    verified:{
+        type:Boolean,
+        default: false,
     },
     createdAt: {
         type: Date,

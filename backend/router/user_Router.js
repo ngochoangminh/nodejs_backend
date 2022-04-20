@@ -1,10 +1,9 @@
-const userController = require('../controlers/user_Controller');
+const user_controller = require('../controlers/user_Controller');
 const router = require('express').Router();
-var jsonParser = require('body-parser').json();
 
-router.post('/register', userController.register);
-router.post('/login', userController.login);
-router.get('/logout',userController.logout)
-
+router.post('/register', user_controller.register);
+router.post('/login', user_controller.login);
+router.get('/logout',user_controller.logout)
+router.get('/verify/:userId/:uniqueString', user_controller.verify_email)
 
 module.exports = router;
