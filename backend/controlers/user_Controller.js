@@ -8,9 +8,6 @@ const path = require('path')
 const contant = require('../configs/contant');
 const { v4: uuidv4 } = require("uuid");
 const dotenv = require('dotenv');
-const { findOneAndUpdate } = require("../models/user_Model");
-const { attachment } = require("express/lib/response");
-const { clear } = require("console");
 dotenv.config();
 
 const UserController = ({
@@ -50,23 +47,24 @@ const UserController = ({
             })
             await new_user.save();
             
-            const unique_string = uuidv4() + new_user._id;
-            const hashed_unique_string = await bcrypt.hash(unique_string, 10);
-            const current_url = `${req.protocol}://${req.get("host")}/`;
-            const confirm_url = current_url + "api/customer/verify/" + new_user.id + "/" + unique_string;
+            var unique_string = uuidv4() + new_user._id;
+            var hashed_unique_string = await bcrypt.hash(unique_string, 10);
+            var current_url = `${req.protocol}://${req.get("host")}/`;
+            var confirm_url = current_url + "api/customer/test/" + new_user.id + "/" + unique_string;
 
 
             const new_verification = new User_Verification({
                 user_id: new_user._id,
                 unique_string: hashed_unique_string,
-                creare_date: Date.now(),
-                expried_time: Date.now() + 3*60*1000,
+                create_date: Date.now(),
+                expries_time: Date.now() + 1*60*60*1000,
             });
 
             await new_verification.save();
             var s_url = `<h2>Confirm verification email!</h2>
-            <a href="${confirm_url}">Click here!</a> to verification your email</p>
-            <h4>contact us</h4>`
+            <a href="${confirm_url}">Click here</a> to verification your email</p>
+            <p>${confirm_url}</p>
+            <h3>contact us</h3>`
             await send_email({
                 from: process.env.SMPT_MAIL,
                 to: email,
@@ -93,50 +91,7 @@ const UserController = ({
         }
     },
 
-    verify_email: async (req, res) => {
-        try {
-            const {user_id, unique_string} = req.params;
-            const verified_check = User_Verification.findOne({user_id});
-
-            if (!verified_check) {
-                const expried_at = verified_check.expried_at;
-                const hashed_uniqe_string = verified_check.unique_string;
-                console.log(user_id, unique_string)
-                if (expried_at < Date.now()) {
-                    await User_Verification.deleteOne({user_id});
-                    await User.deleteOne({_id:user_id});
-
-                    return res.status(400).json({
-                        success: false,
-                        msg: "Link has expried, please register again!"
-                    });
-                } else {
-                    const is_match = bcrypt.compare(unique_string, hashed_uniqe_string);
-                    if (is_match) {
-                        await User.findOneAndUpdate({_id:user_id}, {verifyEmail:true});
-                        await User_Verification.deleteOne({user_id});
-
-                        return res.status(201).json({
-                            success: true,
-                            msg: "User is verified!",
-                        });
-                    } else {
-                        return res.status(400).json({
-                            success:false,
-                            msg: "Unique string is not match!",
-                        });
-                    }    
-                }
-            }
-        } catch (err) {
-            console.log("catch error")
-            return res.status(400).json({
-                success: false,
-                msg: err.message,
-            });
-        }
-    },
-
+   
     login: async (req, res) => {
         try {
             const {phone_number, password} = req.body;
@@ -193,7 +148,66 @@ const UserController = ({
             });
         }
     },
+    verify_email: async (req, res) => {
+        try {
+            const {uid, ustr} = req.params;
+            // console.log(typeof uid);
+            const check = await User_Verification.findOne({user_id:uid, role:0});
+            
+            if (typeof check !== 'undefined') {
+                // console.log("in if :", check)
+                const hashed_ustr = check.unique_string;
+                const expries_date = check.expries_time;
+                // console.log("expdate and hashstr: ", check.expries_time, expries_date, hashed_ustr);
+                if (typeof expries_date !== 'undefined' && typeof hashed_ustr !== 'undefined') {
+                    if (Date.now() > expries_date) {
+                        await User_Verification.deleteOne({user_id:uid});
+                        await User.deleteOne({_id:iud});
     
+                        return res.status(400).json({
+                            success: false,
+                            msg: "Link has expried, please register again!"
+                        }); 
+    
+                    } else {
+                        // console.log('>>>>> link is still validated');
+                        var is_match = bcrypt.compare(ustr, hashed_ustr);
+                        if (is_match) {
+                            await User.findOneAndUpdate({_id: uid}, {verified: true});
+                            await User_Verification.deleteOne({user_id:uid});
+    
+                            return res.status(201).json({
+                                success: true,
+                                msg: "User is verified!",
+                            });
+    
+                        } else {
+                            return res.status(400).json({
+                                success:false,
+                                msg: "Unique string is not match!",
+                            });
+                        } 
+                    }
+                }  else {
+                    return res.status(400).json({
+                        success:false,
+                        msg: "expried date or unique string is undefined!",
+                    });
+                }
+                
+            } else {
+                return res.status(400).json({
+                    success:false,
+                    msg: "check is not found!",
+                });
+            }
+        } catch (err) {
+            return res.status(400).json({
+                success: false,
+                msg: err.message,
+            });
+        }
+    },
 });
 
 module.exports = UserController;
