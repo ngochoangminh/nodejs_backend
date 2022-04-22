@@ -8,6 +8,7 @@ const path = require('path')
 const contant = require('../configs/contant');
 const { v4: uuidv4 } = require("uuid");
 const dotenv = require('dotenv');
+const { json } = require("express/lib/response");
 
 dotenv.config();
 
@@ -285,7 +286,7 @@ const UserController = ({
     },
     profile: async (req, res) => {
         try {
-            console.log(req.user.id)
+            // console.log(req.user.id)
             var user = await User.findById(req.user.id).select("-password");
             
             if (!user)
@@ -302,6 +303,27 @@ const UserController = ({
         } catch (err) {
             return res.status(400).json({
                 success:false,
+                msg: err.message,
+            });
+        }
+    },
+
+    update_user: async (req, res) => {
+        try {var {name} = req.body;
+            var user = await User.findById(req.user.id).select("-password");
+            if (!user)
+                return res.status(400).json({
+                    success: false,
+                    msg: "User does not exist.",
+                });
+            await User.findOneAndUpdate({_id:req.user.id},{name:name, updatedAt:Date.now()});
+            return res.status(201).json({
+                success: true,
+                msg: "User updated!",
+            });
+        } catch (err) {
+            return res.status(400).json({
+                success: false,
                 msg: err.message,
             });
         }

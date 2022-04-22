@@ -1,6 +1,6 @@
 const express = require('express');
 const http =  require('http');
-const { options } = require('./app');
+// const { options } = require('./app');
 const app = require('./app')
 const connectDB = require('./configs/db');
 

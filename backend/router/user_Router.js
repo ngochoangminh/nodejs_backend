@@ -9,5 +9,7 @@ router.post('/checkUser', user_controller.checkUserExisted);
 router.post('/login', user_controller.login);
 router.get('/logout',user_controller.logout);
 router.get('/profile', auth, user_controller.profile);
+router.post('/update', auth, user_controller.update_user);
 router.get('/getall', user_controller.get_all);
+
 module.exports = router;
