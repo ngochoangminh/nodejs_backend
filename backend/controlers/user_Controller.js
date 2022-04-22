@@ -62,8 +62,7 @@ const UserController = ({
 
             await new_verification.save();
             var s_url = `<h2>Confirm verification email!</h2>
-            <a href="${confirm_url}">Click here</a> to verification your email</p>
-            <p>${confirm_url}</p>
+            <p><a href="${confirm_url}">Click here</a> to verification your email</p>
             <h3>contact us</h3>`
             await send_email({
                 from: process.env.SMPT_MAIL,
@@ -115,13 +114,13 @@ const UserController = ({
                         {
                             httpOnly: true,
                             path:'/api/auth/refresh_token',
-                            maxage: contant._7_day
+                            maxage: contant._7_day,
                         });
-            console.log(`${user.name} is singed!`)
+            
             res.status(201).json({
                 success:true,
                 access_token,
-                msg: "Login successful!"
+                msg: `Login successful! ${user.name} is singed!`,
             })
         } catch (err) {
             return res.status(400).json({
@@ -204,6 +203,30 @@ const UserController = ({
         } catch (err) {
             return res.status(400).json({
                 success: false,
+                msg: err.message,
+            });
+        }
+    },
+    profile: async (req, res) => {
+        try {
+            // console.log(req)
+            // var user = User.findById(req.user.id).select("-password");
+            const user = await User.find();
+            // console.log(user)
+            if (!user)
+                return res.json({
+                    status: 400,
+                    success: false,
+                    msg: "User does not exist.",
+                });
+            return res.status(200).json({
+                status: 200,
+                success: true,
+                user,
+            });
+        } catch (err) {
+            return res.status(400).json({
+                success:false,
                 msg: err.message,
             });
         }
