@@ -93,7 +93,6 @@ const UserController = ({
         }
     },
 
-<<<<<<< HEAD
     refresh_token: async (req, res) => {
         try {
             const rf_token = req.cookie.refreshtoken;
@@ -123,7 +122,12 @@ const UserController = ({
             
         } catch (err) {
             return res.status(400).json({
-=======
+                success: false,
+                msg: err.message,
+            });
+        }
+    },
+
     checkUserExisted: async (req, res) => {
         try {
             const {phone_number} = req.body;
@@ -142,15 +146,11 @@ const UserController = ({
         catch (err) {
             return res.status(400).json({
                 success: false,
->>>>>>> ee1e18bd387122d0682fed854abf8f33eccf5ad6
                 msg: err.message,
             });
         }
     },
-<<<<<<< HEAD
-=======
 
->>>>>>> ee1e18bd387122d0682fed854abf8f33eccf5ad6
    
     login: async (req, res) => {
         try {
