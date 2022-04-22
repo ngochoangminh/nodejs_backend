@@ -8,6 +8,7 @@ const path = require('path')
 const contant = require('../configs/contant');
 const { v4: uuidv4 } = require("uuid");
 const dotenv = require('dotenv');
+
 dotenv.config();
 
 const UserController = ({
@@ -50,7 +51,7 @@ const UserController = ({
             var unique_string = uuidv4() + new_user._id;
             var hashed_unique_string = await bcrypt.hash(unique_string, 10);
             var current_url = `${req.protocol}://${req.get("host")}/`;
-            var confirm_url = current_url + "api/customer/test/" + new_user.id + "/" + unique_string;
+            var confirm_url = current_url + "api/auth/verify/" + new_user.id + "/" + unique_string;
 
 
             const new_verification = new User_Verification({
@@ -90,6 +91,39 @@ const UserController = ({
         }
     },
 
+    refresh_token: async (req, res) => {
+        try {
+            const rf_token = req.cookie.refreshtoken;
+            if (!rf_token) {
+                return res.status(400).json({
+                    msg: 'Please login!',
+                });
+            } else {
+                jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+                    if (err) {
+                        return res.status(400).json({
+                            msg: "Please Login or Register",
+                          });
+                    } else {
+                        const accesstoken = STORAGE.createAccessToken({
+                            id: user.id,
+                            role: user.role,
+                        });
+                        res.status(200).json({
+                            success: true,
+                            msg: "Refresh token is created!",
+                            accessToken: accesstoken,
+                        });
+                    }
+                });
+            }
+            
+        } catch (err) {
+            return res.status(400).json({
+                msg: err.message,
+            });
+        }
+    },
    
     login: async (req, res) => {
         try {
@@ -98,14 +132,14 @@ const UserController = ({
             if (!user)
                 return res.status(400).json({
                     success:false,
-                    msg: "Username does not exits!"
+                    msg: "Username does not exits!",
                 })
             const passwordCompare = await bcrypt.compare(password, user.password);
             if (!passwordCompare)
                 return res.status(400).json({
                     success:false,
                     msg: "Invalid password!"
-                })
+                });
             
             const access_token = util.createAccessToken({id:user._id});
             const refresh_token = util.createRefreshToken({id:user._id});
@@ -116,12 +150,12 @@ const UserController = ({
                             path:'/api/auth/refresh_token',
                             maxage: contant._7_day,
                         });
-            
+            res.setHeader("Authorization",access_token)
             res.status(201).json({
                 success:true,
-                access_token,
+                accessToken: access_token,
                 msg: `Login successful! ${user.name} is singed!`,
-            })
+            });
         } catch (err) {
             return res.status(400).json({
                 success: false,
@@ -207,12 +241,26 @@ const UserController = ({
             });
         }
     },
+    get_all: async (req,res)=>{
+        try {
+            var user = await User.find();
+            return res.status(201).json({
+                user,
+                success: true,
+                msg: "Successful!"
+            });
+        } catch (err) {
+            return res.status(400).json({
+                success: false,
+                msg: err.message,
+            });
+        }
+    },
     profile: async (req, res) => {
         try {
-            // console.log(req)
-            // var user = User.findById(req.user.id).select("-password");
-            const user = await User.find();
-            // console.log(user)
+            console.log(req.user.id)
+            var user = await User.findById(req.user.id).select("-password");
+            
             if (!user)
                 return res.json({
                     status: 400,

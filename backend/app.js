@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const customerRT = require('./router/user_Router.js');
 
 // Authen
-app.use('/api/customer', customerRT); // localhost:{$PORT}/api/customer/register
+app.use('/api/auth', customerRT); // localhost:{$PORT}/api/customer/register
 
 app.get('/', (request, response) => {
     // The string we want to display on http://localhost:3000

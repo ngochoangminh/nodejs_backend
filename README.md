@@ -20,7 +20,7 @@ npm_package_use
 └── uuid@8.3.2
 ```
 
-## Run server
+## Run server for ubuntu
 ```
 npx nodemon backend/server.js
 ```
