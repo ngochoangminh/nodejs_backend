@@ -39,13 +39,14 @@ const UserController = ({
                 });
 
             const passwordHash = await bcrypt.hash(password, 10);
-            console.log(`user added: ${phone_number} - ${email} - ${password}`);
+            // console.log(`user added: ${phone_number} - ${email} - ${password}`);
             const new_user = new User ({
                 name,
                 phone_number,
                 email,
                 password:passwordHash,
             })
+            
             await new_user.save();
             
             var unique_string = uuidv4() + new_user._id;
@@ -65,6 +66,7 @@ const UserController = ({
             var s_url = `<h2>Confirm verification email!</h2>
             <p><a href="${confirm_url}">Click here</a> to verification your email</p>
             <h3>contact us</h3>`
+
             await send_email({
                 from: process.env.SMPT_MAIL,
                 to: email,
@@ -91,6 +93,7 @@ const UserController = ({
         }
     },
 
+<<<<<<< HEAD
     refresh_token: async (req, res) => {
         try {
             const rf_token = req.cookie.refreshtoken;
@@ -120,10 +123,34 @@ const UserController = ({
             
         } catch (err) {
             return res.status(400).json({
+=======
+    checkUserExisted: async (req, res) => {
+        try {
+            const {phone_number} = req.body;
+            const user = await User.findOne({phone_number})
+            if (!user)
+                return res.status(400).json({
+                    success : false,
+                    msg : 'Phone numbers are not exists!'
+                });
+            console.log(`${user.name} is existed!`)
+            res.status(201).json({
+                    success:true,
+                    msg: "User is existed"
+                })
+        }
+        catch (err) {
+            return res.status(400).json({
+                success: false,
+>>>>>>> ee1e18bd387122d0682fed854abf8f33eccf5ad6
                 msg: err.message,
             });
         }
     },
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee1e18bd387122d0682fed854abf8f33eccf5ad6
    
     login: async (req, res) => {
         try {

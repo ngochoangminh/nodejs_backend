@@ -6,7 +6,7 @@ require('dotenv').config();
 const send_email = async (options) => {
     const transporter = node_mail.createTransport({
         host: process.env.SMPT_HOST,
-        port: 535, // process.env.SMPT_PORT,
+        port: 465, // process.env.SMPT_PORT,
         secure: false, // true for 465, false for other ports
         service: process.env.SMPT_SERVICE,
         auth: {
