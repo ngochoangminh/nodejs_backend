@@ -38,13 +38,14 @@ const UserController = ({
                 });
 
             const passwordHash = await bcrypt.hash(password, 10);
-            console.log(`user added: ${phone_number} - ${email} - ${password}`);
+            // console.log(`user added: ${phone_number} - ${email} - ${password}`);
             const new_user = new User ({
                 name,
                 phone_number,
                 email,
                 password:passwordHash,
             })
+            
             await new_user.save();
             
             var unique_string = uuidv4() + new_user._id;
@@ -65,6 +66,7 @@ const UserController = ({
             <a href="${confirm_url}">Click here</a> to verification your email</p>
             <p>${confirm_url}</p>
             <h3>contact us</h3>`
+
             await send_email({
                 from: process.env.SMPT_MAIL,
                 to: email,
@@ -84,6 +86,29 @@ const UserController = ({
                 msg: `Verification email was send to ${email}`,
             });
         } catch (err) {
+            return res.status(400).json({
+                success: false,
+                msg: err.message,
+            });
+        }
+    },
+
+    checkUserExisted: async (req, res) => {
+        try {
+            const {phone_number} = req.body;
+            const user = await User.findOne({phone_number})
+            if (!user)
+                return res.status(400).json({
+                    success : false,
+                    msg : 'Phone numbers are not exists!'
+                });
+            console.log(`${user.name} is existed!`)
+            res.status(201).json({
+                    success:true,
+                    msg: "User is existed"
+                })
+        }
+        catch (err) {
             return res.status(400).json({
                 success: false,
                 msg: err.message,
