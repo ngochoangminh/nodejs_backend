@@ -19,3 +19,8 @@ npm_package_use
 ├── nodemon@2.0.15
 └── uuid@8.3.2
 ```
+
+## Run server
+```
+npx nodemon backend/server.js
+```
